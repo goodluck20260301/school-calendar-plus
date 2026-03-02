@@ -160,7 +160,7 @@
             background: #e5e5ea;
             border-radius: 40px;
             padding: 14px 20px;
-            margin: 0 0 20px 0;  /* 只有底部边距 */
+            margin: 0 0 20px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -226,7 +226,7 @@
         .month-stats {
             display: flex;
             gap: 8px;
-            margin-left: auto; /* 靠右对齐 */
+            margin-left: auto;
             font-size: 0.8rem;
             font-weight: 500;
             color: #5856d6;
@@ -325,16 +325,69 @@
             text-align: center;
             margin-top: 16px;
         }
+        /* 折叠面板样式 */
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .collapsible-header span {
+            font-size: 1rem;
+        }
+        .collapsible-content {
+            display: none;
+        }
+        .collapsible-content.expanded {
+            display: block;
+        }
+        .arrow {
+            transition: transform 0.2s;
+        }
+        .arrow.expanded {
+            transform: rotate(90deg);
+        }
+        /* 更新日志链接 */
+        .changelog-link {
+            text-align: center;
+            margin-top: 8px;
+        }
+        .changelog-link a {
+            color: #8c8c92;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        /* 导出标题样式 */
+        .export-header {
+            background: #e5e5ea;
+            border-radius: 40px;
+            padding: 10px 20px;
+            margin: 0 0 5px 0;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1c1c1e;
+            border: 0.5px solid rgba(60,60,67,0.1);
+        }
+        .export-subheader {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #5856d6;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 <div class="card">
     <h2>合一·三千里托辅校历计算器</h2>
 
-    <!-- 操作面板 (不导出) -->
+    <!-- 设置校历模块 (原生成校历面板，添加标题) -->
     <div class="date-panel">
+        <div style="font-weight:600; margin-bottom:10px;">📅 设置校历</div>
         <div class="date-group">
-            <label>📌 校历</label>
+            <label>起始日期</label>
             <input type="date" id="schoolStart" class="date-input" value="2026-02-26">
             <span style="color:#8c8c92;">～</span>
             <input type="date" id="schoolEnd" class="date-input" value="2026-06-30">
@@ -344,9 +397,9 @@
         </div>
     </div>
 
-    <!-- 单选区：托类型 -->
+    <!-- 单选区：托辅类型（原托类型） -->
     <div class="radio-group" id="typeGroup1">
-        <span style="font-weight:500; color:#3a3a3c;">托类型：</span>
+        <span style="font-weight:500; color:#3a3a3c;">托辅类型：</span>
         <div class="radio-item">
             <input type="radio" name="careType" id="careMorning" value="午托" checked>
             <label for="careMorning">午托</label>
@@ -374,15 +427,53 @@
         </div>
     </div>
 
-    <div class="date-panel">
-        <div class="date-group">
-            <label>🛒 服务周期</label>
-            <input type="date" id="purchaseStart" class="date-input" value="2026-02-26">
-            <span style="color:#8c8c92;">～</span>
-            <input type="date" id="purchaseEnd" class="date-input" value="2026-06-30">
+    <!-- 标记校历面板（原服务周期面板）标题和按钮文字修改 -->
+    <div class="date-panel" id="purchasePanel">
+        <div class="collapsible-header" id="purchaseHeader">
+            <span>📌 标记校历</span>
+            <span class="arrow" id="purchaseArrow">▶</span>
         </div>
-        <div class="btn-row">
-            <button class="btn btn-ex" id="markPurchaseBtn">标记工作日 (绿)</button>
+        <div class="collapsible-content" id="purchaseContent">
+            <div class="date-group">
+                <label>起始日期</label>
+                <input type="date" id="purchaseStart" class="date-input" value="2026-02-26">
+                <span style="color:#8c8c92;">～</span>
+                <input type="date" id="purchaseEnd" class="date-input" value="2026-06-30">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-ex" id="markPurchaseBtn">标记校历（绿）</button>
+                <button class="btn" id="clearAllBtn">取消所有标绿</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推算截止日面板（保持不变） -->
+    <div class="date-panel" id="calcPanel">
+        <div class="collapsible-header" id="calcHeader">
+            <span>📅 推算截止日</span>
+            <span class="arrow" id="calcArrow">▶</span>
+        </div>
+        <div class="collapsible-content" id="calcContent">
+            <div class="date-group">
+                <label>起始日期</label>
+                <input type="date" id="calcStart" class="date-input" value="2026-02-26">
+            </div>
+            <div class="date-group">
+                <label>天数</label>
+                <input type="number" id="calcDays" class="date-input" value="10" min="1" style="flex:0.5;">
+                <span style="margin-left:8px;">天</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-primary" id="calcBtn">计算截止日</button>
+            </div>
+            <div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span>截止日期：</span><span id="calcEndDisplay">未计算</span>
+            </div>
+            <div style="margin-top:12px; display:flex; gap:10px;">
+                <button class="btn" id="modeFixedBtn">固定天数修改日历</button>
+                <button class="btn" id="modeRecalcBtn">修改日历重算天数</button>
+            </div>
+            <div style="margin-top:8px; font-size:0.8rem; color:#5856d6;" id="modeHint">当前模式：未激活</div>
         </div>
     </div>
 
@@ -407,6 +498,12 @@
     <div class="footer">
         <button class="btn-export" id="exportBtn">⬇️ 导出图片</button>
     </div>
+
+    <!-- 更新日志链接 -->
+    <div class="changelog-link">
+        <a href="#" id="changelogLink">📋 更新日志</a>
+    </div>
+
     <div class="small-note">
         * 点击有效日期切换：根据托模式自动调整(绿→蓝→红→普通周末→自动)<br>
         * 预设2026法定假日，周末中的假日也显示红底“假”。服务周期默认跟随校历。
@@ -424,6 +521,16 @@
     // 托类型与到校类型
     let careType = '午托';          // '午托', '晚托', '全托'
     let attendType = '正常到校';    // '正常到校', '固定时段无法到校' (仅在全托时有效)
+
+    // 推算截止日相关
+    let calcDatesSet = new Set();          // 存储推算产生的日期 (YYYY-MM-DD)
+    let calcMode = null;                   // 'fixed' 或 'recalc'
+    let calcStartDate = null;              // 起始日期 Date 对象
+    let calcDays = 0;                      // 天数
+    let calcEndDate = null;                // 截止日期 Date 对象
+
+    // 导出过滤标志
+    let filterMonthsWithNoMarks = false;
 
     // ----- 预设2026年法定节假日（主要假日）-----
     function initHolidays2026() {
@@ -488,7 +595,7 @@
         const totalWorkdays = greenCells.length + blueCells.length;
         document.getElementById('green-counter').innerText = totalWorkdays;
 
-        // 计算课时数（逻辑不变）
+        // 计算课时数
         let lessonCount = 0;
         if (careType === '午托' || careType === '晚托') {
             lessonCount = greenCells.length;
@@ -511,6 +618,101 @@
                 }
             }
         }
+    }
+
+    // ----- 推算截止日相关函数 -----
+    // 计算从起始日期开始，跳过周末和节假日，返回包含 days 个工作日的数组和截止日期
+    function calculateWorkdays(startDate, days) {
+        let result = [];
+        let current = new Date(startDate);
+        while (result.length < days) {
+            if (isAutoWorkingDay(current)) {
+                result.push(new Date(current));
+            }
+            current.setDate(current.getDate() + 1);
+            // 防止无限循环（最多1000天）
+            if (result.length === 0 && current - startDate > 1000*24*3600*1000) break;
+        }
+        if (result.length === days) {
+            return { dates: result, endDate: result[result.length-1] };
+        } else {
+            return null;
+        }
+    }
+
+    // 应用推算结果：清除旧的推算标记，添加新的
+    function applyCalcResult(datesArray) {
+        // 从 manualOverrides 中移除旧的推算标记
+        for (let date of calcDatesSet) {
+            manualOverrides.delete(date);
+        }
+        calcDatesSet.clear();
+        // 添加新的
+        datesArray.forEach(d => {
+            const ymd = toYMD(d);
+            calcDatesSet.add(ymd);
+            manualOverrides.set(ymd, 'work');
+        });
+        // 更新截止日期显示
+        if (datesArray.length > 0) {
+            calcEndDate = datesArray[datesArray.length-1];
+            document.getElementById('calcEndDisplay').innerText = toYMD(calcEndDate);
+        }
+        renderCalendar();
+    }
+
+    // 清除所有推算标记和模式
+    function clearCalc() {
+        for (let date of calcDatesSet) {
+            manualOverrides.delete(date);
+        }
+        calcDatesSet.clear();
+        calcMode = null;
+        document.getElementById('modeHint').innerText = '当前模式：未激活';
+        document.getElementById('calcEndDisplay').innerText = '未计算';
+        renderCalendar();
+    }
+
+    // 寻找下一个工作日（从 startDate 之后开始，排除已存在的日期集合）
+    function findNextWorkday(startDate, excludedSet = new Set()) {
+        let next = new Date(startDate);
+        next.setDate(next.getDate() + 1);
+        while (!isAutoWorkingDay(next) || excludedSet.has(toYMD(next))) {
+            next.setDate(next.getDate() + 1);
+        }
+        return next;
+    }
+
+    // 根据服务周期自动标记所有工作日（绿色）
+    function autoMarkWorkdays() {
+        // 清除所有手动标记（包括推算的）
+        manualOverrides.clear();
+        calcDatesSet.clear();
+        calcMode = null;
+        document.getElementById('modeHint').innerText = '当前模式：未激活';
+        document.getElementById('calcEndDisplay').innerText = '未计算';
+
+        if (!purchaseStart || !purchaseEnd) return;
+
+        let current = new Date(purchaseStart);
+        while (current <= purchaseEnd) {
+            if (isAutoWorkingDay(current)) {
+                const ymd = toYMD(current);
+                manualOverrides.set(ymd, 'work');
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        renderCalendar();
+    }
+
+    // 取消所有标绿
+    function clearAllGreen() {
+        manualOverrides.clear();
+        calcDatesSet.clear();
+        calcMode = null;
+        document.getElementById('modeHint').innerText = '当前模式：未激活';
+        document.getElementById('calcEndDisplay').innerText = '未计算';
+        renderCalendar();
     }
 
     // ----- 核心渲染：生成月份卡片 (单列) -----
@@ -569,24 +771,20 @@
                     const ymd = toYMD(dateObj);
 
                     if (isCurrentMonth && inRange) {
-                        // 判断手动覆盖
                         let manual = manualOverrides.get(ymd);
                         if (manual === 'work') {
                             monthGreen++;
                         } else if (manual === 'work_blue') {
                             monthBlue++;
-                        } else if (manual === 'holiday' || manual === 'weekend') {
-                            // 不计
-                        } else {
-                            // 自动逻辑
-                            if (inPurchaseRange(dateObj) && isAutoWorkingDay(dateObj)) {
-                                monthGreen++;
-                            }
-                            // 节假日不计入绿蓝
                         }
                     }
                 });
             });
+
+            // 如果启用了过滤且该月无绿蓝，则跳过该月
+            if (filterMonthsWithNoMarks && monthGreen === 0 && monthBlue === 0) {
+                continue;
+            }
 
             // 计算当月课时
             let monthLessons = 0;
@@ -600,14 +798,14 @@
                 }
             }
 
-            // 构建月份卡片
+            // 构建月份卡片 - 修改月份显示：只显示月份，年份单独用灰色
             let monthCard = `<div class="month-card">`;
             monthCard += `<div class="month-title">`;
-            monthCard += `<span>${year}年${month+1}月</span>`;
+            monthCard += `<span>${month+1}月</span>`;  // 只显示月份
             monthCard += `<span class="month-year">${year}</span>`;
             monthCard += `<div class="month-stats">`;
-            monthCard += `<span>📆 ${monthGreen + monthBlue}</span>`; // 服务天数
-            monthCard += `<span>📚 ${monthLessons}</span>`; // 购买课时
+            monthCard += `<span>📆 ${monthGreen + monthBlue}</span>`;
+            monthCard += `<span>📚 ${monthLessons}</span>`;
             monthCard += `</div>`;
             monthCard += `</div>`;
             monthCard += `<div class="weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>`;
@@ -641,9 +839,6 @@
                         // 无背景
                     } else {
                         if (inRange && isCurrentMonth) {
-                            if (inPurchaseRange(dateObj) && isAutoWorkingDay(dateObj)) {
-                                cellClass += ' working-green';
-                            }
                             if (holidaysSet.has(ymd)) {
                                 cellClass += ' auto-holiday';
                                 holidayTag = true;
@@ -651,7 +846,7 @@
                         }
                     }
 
-                    monthCard += `<div class="${cellClass}" data-date="${ymd}">`;
+                    monthCard += `<div class="${cellClass}" data-date="${ymd}" data-calc="${calcDatesSet.has(ymd) ? 'true' : 'false'}">`;
                     monthCard += `<span>${dayNum}</span>`;
                     if (holidayTag) {
                         monthCard += `<span class="holiday-tag">假</span>`;
@@ -668,7 +863,85 @@
         updateStat();
     }
 
-    // ----- 点击切换手动状态 -----
+    // ----- 固定天数模式下的智能点击处理 -----
+    function handleFixedModeClick(dateStr) {
+        const targetDate = new Date(dateStr + 'T00:00:00');
+        const targetYMD = dateStr;
+
+        // 如果点击的日期已在集合中，则移除它，并添加一个新的工作日到最后
+        if (calcDatesSet.has(targetYMD)) {
+            // 移除当前
+            manualOverrides.delete(targetYMD);
+            calcDatesSet.delete(targetYMD);
+            // 寻找下一个可用的工作日（从被移除的日期之后开始找，跳过已存在的集合）
+            let nextWorkday = findNextWorkday(targetDate, calcDatesSet);
+            const nextYMD = toYMD(nextWorkday);
+            manualOverrides.set(nextYMD, 'work');
+            calcDatesSet.add(nextYMD);
+            calcEndDate = nextWorkday;
+        } else {
+            // 点击白色日期，添加它，并移除最晚的绿色（如果超出天数）
+            // 如果该日期已经是其他颜色（如蓝或红），我们允许强制改为绿，但需要先移除原有标记
+            if (manualOverrides.has(targetYMD)) {
+                manualOverrides.delete(targetYMD);
+            }
+            manualOverrides.set(targetYMD, 'work');
+            calcDatesSet.add(targetYMD);
+            // 如果超出数量，移除最晚的绿色（不包括刚添加的）
+            if (calcDatesSet.size > calcDays) {
+                const sorted = Array.from(calcDatesSet).sort();
+                // 最晚的可能是刚添加的，如果刚添加的就是最晚的，则移除次晚的
+                let removed = null;
+                if (sorted[sorted.length-1] === targetYMD && sorted.length > 1) {
+                    removed = sorted[sorted.length-2];
+                } else {
+                    removed = sorted[sorted.length-1];
+                }
+                manualOverrides.delete(removed);
+                calcDatesSet.delete(removed);
+            }
+            // 更新截止日期
+            const sorted = Array.from(calcDatesSet).sort();
+            calcEndDate = new Date(sorted[sorted.length-1] + 'T00:00:00');
+        }
+        document.getElementById('calcEndDisplay').innerText = toYMD(calcEndDate);
+        renderCalendar();
+    }
+
+    // ----- 重算天数模式点击处理（包括绿色和白色）-----
+    function handleRecalcModeClick(dateStr) {
+        const targetYMD = dateStr;
+
+        if (calcDatesSet.has(targetYMD)) {
+            // 点击绿色：移除它
+            manualOverrides.delete(targetYMD);
+            calcDatesSet.delete(targetYMD);
+        } else {
+            // 点击白色：添加它（强制改为绿，先移除其他颜色标记）
+            if (manualOverrides.has(targetYMD)) {
+                manualOverrides.delete(targetYMD);
+            }
+            manualOverrides.set(targetYMD, 'work');
+            calcDatesSet.add(targetYMD);
+        }
+
+        // 更新天数输入框
+        const newDays = calcDatesSet.size;
+        document.getElementById('calcDays').value = newDays;
+        // 重新计算截止日期
+        if (newDays > 0) {
+            const sorted = Array.from(calcDatesSet).sort();
+            const lastYmd = sorted[sorted.length-1];
+            calcEndDate = new Date(lastYmd + 'T00:00:00');
+            document.getElementById('calcEndDisplay').innerText = lastYmd;
+        } else {
+            calcEndDate = null;
+            document.getElementById('calcEndDisplay').innerText = '无';
+        }
+        renderCalendar();
+    }
+
+    // ----- 点击切换手动状态 (整合推算模式) -----
     function handleCellClick(e) {
         const cell = e.target.closest('.cal-cell');
         if (!cell) return;
@@ -677,6 +950,19 @@
         const dateStr = cell.dataset.date;
         if (!dateStr) return;
 
+        // 如果在固定天数模式下，且推算集合非空
+        if (calcMode === 'fixed' && calcDatesSet.size > 0) {
+            handleFixedModeClick(dateStr);
+            return;
+        }
+
+        // 如果在重算天数模式下，且推算集合非空（点击任何颜色都进入重算逻辑）
+        if (calcMode === 'recalc' && calcDatesSet.size > 0) {
+            handleRecalcModeClick(dateStr);
+            return;
+        }
+
+        // 原有的点击切换逻辑（用于非推算模式）
         let currentManual = manualOverrides.get(dateStr);
         const fixed = isFixedMode();
 
@@ -738,11 +1024,63 @@
         const purchaseEndInput = document.getElementById('purchaseEnd');
         const genBtn = document.getElementById('genSchoolBtn');
         const markBtn = document.getElementById('markPurchaseBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
         const exportBtn = document.getElementById('exportBtn');
         const calendarContainer = document.getElementById('calendarContainer');
         const careRadios = document.querySelectorAll('input[name="careType"]');
         const attendRadios = document.querySelectorAll('input[name="attendType"]');
         const typeGroup2 = document.getElementById('typeGroup2');
+
+        // 折叠面板控制
+        const purchaseHeader = document.getElementById('purchaseHeader');
+        const purchaseContent = document.getElementById('purchaseContent');
+        const purchaseArrow = document.getElementById('purchaseArrow');
+        const calcHeader = document.getElementById('calcHeader');
+        const calcContent = document.getElementById('calcContent');
+        const calcArrow = document.getElementById('calcArrow');
+
+        let purchaseExpanded = false;
+        let calcExpanded = false;
+
+        function expandPanel(panel) {
+            if (panel === 'purchase') {
+                purchaseExpanded = true;
+                purchaseContent.classList.add('expanded');
+                purchaseArrow.classList.add('expanded');
+                purchaseArrow.innerText = '▼';
+                // 折叠另一个
+                calcExpanded = false;
+                calcContent.classList.remove('expanded');
+                calcArrow.classList.remove('expanded');
+                calcArrow.innerText = '▶';
+            } else if (panel === 'calc') {
+                calcExpanded = true;
+                calcContent.classList.add('expanded');
+                calcArrow.classList.add('expanded');
+                calcArrow.innerText = '▼';
+                purchaseExpanded = false;
+                purchaseContent.classList.remove('expanded');
+                purchaseArrow.classList.remove('expanded');
+                purchaseArrow.innerText = '▶';
+            }
+        }
+
+        purchaseHeader.addEventListener('click', function() {
+            expandPanel(purchaseExpanded ? null : 'purchase');
+        });
+
+        calcHeader.addEventListener('click', function() {
+            expandPanel(calcExpanded ? null : 'calc');
+        });
+
+        // 默认展开标记校历面板
+        expandPanel('purchase');
+
+        // 推算相关元素
+        const calcBtn = document.getElementById('calcBtn');
+        const modeFixedBtn = document.getElementById('modeFixedBtn');
+        const modeRecalcBtn = document.getElementById('modeRecalcBtn');
+        const modeHint = document.getElementById('modeHint');
 
         careRadios.forEach(radio => {
             radio.addEventListener('change', function(e) {
@@ -785,6 +1123,7 @@
             renderCalendar();
         });
 
+        // 标记校历按钮：自动标记服务周期内所有工作日（绿色）
         markBtn.addEventListener('click', function() {
             purchaseStart = getDateFromInput('purchaseStart');
             purchaseEnd = getDateFromInput('purchaseEnd');
@@ -796,20 +1135,101 @@
                 alert('请先生成校历');
                 return;
             }
+            autoMarkWorkdays();
+        });
+
+        // 取消所有标绿按钮
+        clearAllBtn.addEventListener('click', function() {
+            clearAllGreen();
+        });
+
+        // 推算按钮事件：先清空所有绿色，再计算
+        calcBtn.addEventListener('click', function() {
+            const start = getDateFromInput('calcStart');
+            const days = parseInt(document.getElementById('calcDays').value);
+            if (!start || days <= 0) {
+                alert('请填写有效的起始日期和天数');
+                return;
+            }
+            // 先清空所有手动标记和推算标记
+            manualOverrides.clear();
+            calcDatesSet.clear();
+            calcMode = null;
+            document.getElementById('modeHint').innerText = '当前模式：未激活';
+
+            const result = calculateWorkdays(start, days);
+            if (!result) {
+                alert('无法在合理范围内找到足够的工作日，请检查起始日期或减少天数');
+                document.getElementById('calcEndDisplay').innerText = '未计算';
+                renderCalendar();
+                return;
+            }
+            calcStartDate = start;
+            calcDays = days;
+            // 应用新结果
+            result.dates.forEach(d => {
+                const ymd = toYMD(d);
+                calcDatesSet.add(ymd);
+                manualOverrides.set(ymd, 'work');
+            });
+            calcEndDate = result.endDate;
+            document.getElementById('calcEndDisplay').innerText = toYMD(calcEndDate);
             renderCalendar();
+        });
+
+        modeFixedBtn.addEventListener('click', function() {
+            if (calcDatesSet.size === 0) {
+                alert('请先计算截止日');
+                return;
+            }
+            calcMode = 'fixed';
+            modeHint.innerText = '当前模式：固定天数修改日历（点击绿色后移，点击白色替换最晚）';
+        });
+
+        modeRecalcBtn.addEventListener('click', function() {
+            if (calcDatesSet.size === 0) {
+                alert('请先计算截止日');
+                return;
+            }
+            calcMode = 'recalc';
+            modeHint.innerText = '当前模式：修改日历重算天数（点击任意日期调整天数）';
         });
 
         calendarContainer.addEventListener('click', handleCellClick);
 
-        // 导出图片：保持单列布局，滚动到统计模块顶部确保贴顶
+        // 导出图片：先过滤无标记月份，添加学生姓名标题和日期副标题，截图后恢复
         exportBtn.addEventListener('click', function() {
+            const studentName = prompt('请输入学生姓名（用于图片标题）', '张三');
+            if (studentName === null) return; // 取消导出
+
             const exportContent = document.getElementById('exportContent');
-            // 记录当前滚动位置
-            const scrollY = window.scrollY;
-            // 滚动到 exportContent 顶部
+            // 创建临时标题元素
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'export-header';
+            headerDiv.innerText = `${studentName} 托辅日历表`;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const dateTimeStr = `生成时间：${year}-${month}-${day} ${hours}:${minutes}`;
+
+            const subHeaderDiv = document.createElement('div');
+            subHeaderDiv.className = 'export-subheader';
+            subHeaderDiv.innerText = dateTimeStr;
+
+            exportContent.insertBefore(headerDiv, exportContent.firstChild);
+            exportContent.insertBefore(subHeaderDiv, exportContent.firstChild.nextSibling);
+
+            // 启用过滤
+            filterMonthsWithNoMarks = true;
+            renderCalendar(); // 重新渲染过滤后的日历
+
+            // 滚动到顶部确保统计模块贴顶
             window.scrollTo(0, exportContent.offsetTop);
 
-            // 等待滚动完成后再截图
             setTimeout(() => {
                 html2canvas(exportContent, {
                     scale: 2,
@@ -818,17 +1238,29 @@
                     useCORS: true,
                     logging: false
                 }).then(canvas => {
-                    // 恢复滚动位置
-                    window.scrollTo(0, scrollY);
+                    // 恢复过滤和移除标题
+                    filterMonthsWithNoMarks = false;
+                    renderCalendar(); // 恢复原状
+                    exportContent.removeChild(headerDiv);
+                    exportContent.removeChild(subHeaderDiv);
                     const link = document.createElement('a');
-                    link.download = '校历服务工作日.png';
+                    link.download = `${studentName}托辅日历.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                 }).catch(err => {
-                    window.scrollTo(0, scrollY);
+                    filterMonthsWithNoMarks = false;
+                    renderCalendar();
+                    exportContent.removeChild(headerDiv);
+                    exportContent.removeChild(subHeaderDiv);
                     alert('截图失败，可手动截图。' + err);
                 });
             }, 100);
+        });
+
+        // 更新日志链接
+        document.getElementById('changelogLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('更新日志 v1.3\n\n- 可以快速计算家长报名的周期内实际的到校天数，以及对应的课时数。\n- 可以直接显示长周期内具体月份的实际天数，以及对应的课时数。\n- 可以计算固定某天不能到校时，对应的课时数。\n- 支持任意周期作为校历周期（会预设好当前学期作为默认周期），例如可以手动修改周期为2026年9月3日至2027年1月31日。\n- 支持校历以图片形式导出，方便作为辅助凭证，以及可以发放给家长确认。\n\n更新日志 v1.41\n\n- 修复文字表述。\n- 新增推算截止日模块。\n- 新增导出图片可录入学生姓名功能。\n- 新增导出图片附带生成时间。');
         });
     });
 
