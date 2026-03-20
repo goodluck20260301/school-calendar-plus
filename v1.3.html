@@ -516,6 +516,7 @@
     let schoolStart = null, schoolEnd = null;
     let purchaseStart = null, purchaseEnd = null;
     let holidaysSet = new Set();         // 预设法定节假日 YYYY-MM-DD
+    let workdayOnWeekendSet = new Set(); // 补班日（周末但需要上班的日子）
     let manualOverrides = new Map();     // key: YYYY-MM-DD, value: 'work' / 'work_blue' / 'holiday' / 'weekend'
 
     // 托类型与到校类型
@@ -540,12 +541,15 @@
         for (let d = 17; d <= 23; d++) holidaysSet.add(`2026-02-${String(d).padStart(2,'0')}`);
         // 清明 4月4-6日
         for (let d = 4; d <= 6; d++) holidaysSet.add(`2026-04-${String(d).padStart(2,'0')}`);
-        // 劳动节 5月1-3日
-        for (let d = 1; d <= 3; d++) holidaysSet.add(`2026-05-${String(d).padStart(2,'0')}`);
+        // 劳动节 5月1-5日 (2026年实际放假安排)
+        for (let d = 1; d <= 5; d++) holidaysSet.add(`2026-05-${String(d).padStart(2,'0')}`);
         // 端午节 6月19-21日
         for (let d = 19; d <= 21; d++) holidaysSet.add(`2026-06-${String(d).padStart(2,'0')}`);
         // 中秋+国庆 10月1-8日
         for (let d = 1; d <= 8; d++) holidaysSet.add(`2026-10-${String(d).padStart(2,'0')}`);
+
+        // 补班日：5月9日（周六）需要上班，视为工作日
+        workdayOnWeekendSet.add(`2026-05-09`);
     }
     initHolidays2026();
 
@@ -576,11 +580,14 @@
         return purchaseStart && purchaseEnd && date >= purchaseStart && date <= purchaseEnd;
     }
 
-    // 自动判断是否为工作日 (周一至五且非法定假日)
+    // 自动判断是否为工作日 (周一至五且非法定假日，但补班日例外)
     function isAutoWorkingDay(date) {
+        const ymd = toYMD(date);
+        // 如果是补班日，视为工作日
+        if (workdayOnWeekendSet.has(ymd)) return true;
         const day = date.getDay();
         if (day === 0 || day === 6) return false;
-        return !holidaysSet.has(toYMD(date));
+        return !holidaysSet.has(ymd);
     }
 
     // 判断当前是否为“固定时段无法到校”模式（全托+固定）
@@ -1260,7 +1267,7 @@
         // 更新日志链接
         document.getElementById('changelogLink').addEventListener('click', function(e) {
             e.preventDefault();
-            alert('更新日志 v1.3\n\n- 可以快速计算家长报名的周期内实际的到校天数，以及对应的课时数。\n- 可以直接显示长周期内具体月份的实际天数，以及对应的课时数。\n- 可以计算固定某天不能到校时，对应的课时数。\n- 支持任意周期作为校历周期（会预设好当前学期作为默认周期），例如可以手动修改周期为2026年9月3日至2027年1月31日。\n- 支持校历以图片形式导出，方便作为辅助凭证，以及可以发放给家长确认。\n\n更新日志 v1.41\n\n- 修复文字表述。\n- 新增推算截止日模块。\n- 新增导出图片可录入学生姓名功能。\n- 新增导出图片附带生成时间。');
+            alert('更新日志 v1.5\n\n- 调整2026年5月节假日：劳动节假期为5月1-5日\n- 新增补班日：5月9日（周六）视为工作日\n\n更新日志 v1.3\n\n- 可以快速计算家长报名的周期内实际的到校天数，以及对应的课时数。\n- 可以直接显示长周期内具体月份的实际天数，以及对应的课时数。\n- 可以计算固定某天不能到校时，对应的课时数。\n- 支持任意周期作为校历周期（会预设好当前学期作为默认周期），例如可以手动修改周期为2026年9月3日至2027年1月31日。\n- 支持校历以图片形式导出，方便作为辅助凭证，以及可以发放给家长确认。\n\n更新日志 v1.41\n\n- 修复文字表述。\n- 新增推算截止日模块。\n- 新增导出图片可录入学生姓名功能。\n- 新增导出图片附带生成时间。');
         });
     });
 
